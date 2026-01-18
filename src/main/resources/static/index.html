@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Cyber Entry</title>
+    <style>
+        body { background: #050a12; color: #00f2ff; font-family: 'Courier New'; text-align: center; }
+        #camera-box {
+            width: 640px; height: 480px; margin: 20px auto;
+            border: 2px solid #00f2ff; position: relative;
+            background-color: #000; box-shadow: 0 0 15px #00f2ff;
+            overflow: hidden;
+        }
+        video {
+            width: 100% !important; height: 100% !important;
+            transform: scaleX(-1); object-fit: cover;
+            position: absolute; top: 0; left: 0; z-index: 1;
+        }
+        #focus-box {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 250px; height: 250px;
+            border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00;
+            pointer-events: none; z-index: 10;
+        }
+
+        /* --- High-Tech Scan Line Animation --- */
+        #scan-line {
+            position: absolute;
+            width: 100%; height: 2px;
+            background: #00ff00;
+            box-shadow: 0 0 15px #00ff00;
+            top: 0; z-index: 11;
+            animation: moveScanLine 3s infinite linear;
+            display: none; /* Only shows when scanning */
+        }
+        @keyframes moveScanLine {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        #preview-img {
+            width: 120px; height: 120px; border: 1px solid #00ff00;
+            margin-top: 10px; display: none; border-radius: 5px;
+        }
+        .flash { animation: flash-anim 0.2s ease-out; }
+        @keyframes flash-anim { from { opacity: 0.5; background: #fff; } to { opacity: 1; } }
+        canvas { display: none; }
+        .btn-group { margin-top: 20px; }
+        button {
+            background: transparent; border: 1px solid #00f2ff; color: #00f2ff;
+            padding: 10px 20px; margin: 5px; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase; font-weight: bold;
+        }
+        button:hover { background: #00f2ff; color: #000; box-shadow: 0 0 10px #00f2ff; }
+        #status-bar { margin-top: 20px; font-weight: bold; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+<h1>SYSTEM ONLINE: AI SCANNER</h1>
+
+<div id="camera-box">
+    <video id="webcam" autoplay playsinline></video>
+    <div id="focus-box">
+        <div id="scan-line"></div>
+    </div>
+</div>
+
+<img id="preview-img" src="" alt="Last Capture">
+<div id="status-bar">STATUS: READY</div>
+
+<div class="btn-group">
+    <button onclick="scanFace()">SCAN & VERIFY</button>
+    <button onclick="registerUser()">REGISTER</button>
+    <button onclick="deleteUser()">DELETE USER</button>
+</div>
+
+<canvas id="photo-canvas" width="250" height="250"></canvas>
+
+<script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('photo-canvas');
+    const statusBar = document.getElementById('status-bar');
+    const previewImg = document.getElementById('preview-img');
+    const scanLine = document.getElementById('scan-line');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => { statusBar.innerText = "STATUS: CAMERA ERROR"; });
+
+    function captureSnapshot() {
+        const context = canvas.getContext('2d');
+        document.getElementById('camera-box').classList.add('flash');
+        setTimeout(() => document.getElementById('camera-box').classList.remove('flash'), 200);
+
+        // Center crop coordinates for 640x480 video
+        context.drawImage(video, 195, 115, 250, 250, 0, 0, 250, 250);
+        const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+
+        previewImg.src = dataUrl;
+        previewImg.style.display = 'inline-block';
+        return dataUrl;
+    }
+
+    function scanFace() {
+        statusBar.innerText = "STATUS: SCANNING...";
+        scanLine.style.display = 'block'; // Start animation
+        const imageData = captureSnapshot();
+
+        fetch('/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageData })
+        })
+            .then(r => r.json())
+            .then(data => {
+                scanLine.style.display = 'none'; // Stop animation
+                statusBar.innerText = "RESULT: " + data.message;
+                if(data.voiceMessage) {
+                    window.speechSynthesis.speak(new SpeechSynthesisUtterance(data.voiceMessage));
+                }
+            });
+    }
+
+    async function registerUser() {
+        const imageData = captureSnapshot();
+
+        setTimeout(() => {
+            const name = prompt("Face captured! Enter Name for Registration:");
+            if (!name) {
+                statusBar.innerText = "STATUS: CANCELLED";
+                return;
+            }
+            statusBar.innerText = "STATUS: UPLOADING " + name.toUpperCase() + "...";
+
+            fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData, name: name.trim() })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    statusBar.innerText = "STATUS: READY";
+                });
+        }, 200);
+    }
+
+    // UPDATED DELETE LOGIC
+    function deleteUser() {
+        const name = prompt("Enter the exact name of the user to delete:");
+        if (!name) return;
+
+        statusBar.innerText = "STATUS: DELETING " + name.toUpperCase() + "...";
+
+        // This sends the name as a URL parameter to match @RequestParam in Java
+        fetch('/delete?name=' + encodeURIComponent(name.trim()), {
+            method: 'DELETE'
+        })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.message);
+                statusBar.innerText = "STATUS: " + data.message;
+            })
+            .catch(err => {
+                console.error(err);
+                statusBar.innerText = "STATUS: DELETE FAILED";
+            });
+    }
+</script>
+</body>
+</html>
