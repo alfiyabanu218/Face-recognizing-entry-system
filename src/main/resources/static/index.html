@@ -1,110 +1,177 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Cyber Entry</title>
+    <title>Department Entry - H O D Administration</title>
     <style>
-        body { background: #050a12; color: #00f2ff; font-family: 'Courier New'; text-align: center; }
+        body {
+            background: #050a12; color: #00f2ff; font-family: 'Courier New';
+            margin: 0; display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* LEFT SIDE: VISITOR INTERFACE */
+        #visitor-side {
+            flex: 1; border-right: 2px solid #00f2ff;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+
+        /* RIGHT SIDE: H O D PANEL (VERTICAL) */
+        #hod-side {
+            width: 360px; background: rgba(255, 0, 85, 0.1);
+            display: flex; flex-direction: column; padding: 25px;
+            border-left: 2px solid #ff0055; box-shadow: inset 0 0 20px rgba(255, 0, 85, 0.2);
+            overflow-y: auto;
+        }
+
         #camera-box {
-            width: 640px; height: 480px; margin: 20px auto;
-            border: 2px solid #00f2ff; position: relative;
-            background-color: #000; box-shadow: 0 0 15px #00f2ff;
-            overflow: hidden;
+            width: 500px; height: 375px; border: 2px solid #00f2ff;
+            position: relative; background: #000; box-shadow: 0 0 15px #00f2ff;
         }
-        video {
-            width: 100% !important; height: 100% !important;
-            transform: scaleX(-1); object-fit: cover;
-            position: absolute; top: 0; left: 0; z-index: 1;
-        }
+        video { width: 100%; height: 100%; transform: scaleX(-1); object-fit: cover; }
+
         #focus-box {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); width: 250px; height: 250px;
-            border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00;
-            pointer-events: none; z-index: 10;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 200px; height: 200px; border: 2px solid #00ff00; z-index: 10;
         }
 
-        /* --- High-Tech Scan Line Animation --- */
         #scan-line {
-            position: absolute;
-            width: 100%; height: 2px;
-            background: #00ff00;
-            box-shadow: 0 0 15px #00ff00;
-            top: 0; z-index: 11;
-            animation: moveScanLine 3s infinite linear;
-            display: none; /* Only shows when scanning */
+            position: absolute; width: 100%; height: 2px; background: #00ff00;
+            top: 0; z-index: 11; animation: moveScanLine 3s infinite linear; display: none;
         }
-        @keyframes moveScanLine {
-            0% { top: 0; }
-            50% { top: 100%; }
-            100% { top: 0; }
+        @keyframes moveScanLine { 0% { top: 0; } 100% { top: 100%; } }
+
+        /* PHOTO PREVIEW STYLE */
+        #preview-box {
+            margin-top: 15px; text-align: center;
+        }
+        #captured-photo {
+            width: 150px; height: 150px; border: 2px solid #00ff00;
+            display: none; box-shadow: 0 0 10px #00ff00; object-fit: cover;
         }
 
-        #preview-img {
-            width: 120px; height: 120px; border: 1px solid #00ff00;
-            margin-top: 10px; display: none; border-radius: 5px;
-        }
-        .flash { animation: flash-anim 0.2s ease-out; }
-        @keyframes flash-anim { from { opacity: 0.5; background: #fff; } to { opacity: 1; } }
-        canvas { display: none; }
-        .btn-group { margin-top: 20px; }
         button {
             background: transparent; border: 1px solid #00f2ff; color: #00f2ff;
-            padding: 10px 20px; margin: 5px; cursor: pointer; transition: 0.3s;
-            text-transform: uppercase; font-weight: bold;
+            padding: 12px 20px; margin: 5px; cursor: pointer; text-transform: uppercase;
+            font-weight: bold; transition: 0.3s;
         }
-        button:hover { background: #00f2ff; color: #000; box-shadow: 0 0 10px #00f2ff; }
-        #status-bar { margin-top: 20px; font-weight: bold; letter-spacing: 2px; }
+        button:hover { background: #00f2ff; color: #000; }
+
+        .hod-section { margin-bottom: 25px; text-align: left; border-bottom: 1px solid rgba(255,0,85,0.2); padding-bottom: 15px; }
+        .hod-btn { width: 100%; border-color: #ff0055; color: #ff0055; margin-bottom: 10px; }
+        .hod-btn:hover { background: #ff0055; color: white; }
+        .admin-btn { border-color: #00ff00; color: #00ff00; }
+        .admin-btn:hover { background: #00ff00; color: black; }
+
+        #status-bar { font-size: 1.2em; margin-top: 20px; color: #fff; font-weight: bold; }
+        input { background: #000; border: 1px solid #ff0055; color: #fff; padding: 10px; width: 90%; margin-bottom: 10px; }
+        label { font-size: 0.75em; color: #ff0055; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-<h1>SYSTEM ONLINE: AI SCANNER</h1>
 
-<div id="camera-box">
-    <video id="webcam" autoplay playsinline></video>
-    <div id="focus-box">
-        <div id="scan-line"></div>
+<div id="visitor-side">
+    <h1 style="letter-spacing: 5px;">DEPARTMENT GATE</h1>
+    <div id="camera-box">
+        <video id="webcam" autoplay playsinline></video>
+        <div id="focus-box"><div id="scan-line"></div></div>
+    </div>
+    <div id="status-bar">STATUS: READY</div>
+
+    <div id="preview-box">
+        <p id="preview-text" style="display:none; color:#00ff00; font-size: 0.8em;">CAPTURED FACE</p>
+        <img id="captured-photo" src="" alt="Captured Face">
+    </div>
+
+    <div style="margin-top: 20px;">
+        <button onclick="scanFace()" style="font-size: 1.5em; padding: 15px 30px;">SCAN & VERIFY</button>
     </div>
 </div>
 
-<img id="preview-img" src="" alt="Last Capture">
-<div id="status-bar">STATUS: READY</div>
+<div id="hod-side">
+    <h2 style="color: #ff0055; margin-top: 0;">H O D PANEL</h2>
 
-<div class="btn-group">
-    <button onclick="scanFace()">SCAN & VERIFY</button>
-    <button onclick="registerUser()">REGISTER</button>
-    <button onclick="deleteUser()">DELETE USER</button>
+    <div class="hod-section">
+        <label>Visitor Requesting Entry:</label>
+        <div id="pending-visitor" style="color: #00ff00; font-weight: bold; font-size: 1.2em; margin-top: 5px;">NONE</div>
+    </div>
+
+    <div class="hod-section">
+        <label>Access Control:</label>
+        <button class="hod-btn" onclick="hodGrant()">GRANT ACCESS</button>
+        <button class="hod-btn" style="border-color: #ffcc00; color: #ffcc00;" onclick="clearSystem()">RESET / AVAILABLE</button>
+    </div>
+
+    <div class="hod-section">
+        <label>Set Busy Notification:</label>
+        <input type="text" id="busyTime" placeholder="e.g. 4:00 PM">
+        <button class="hod-btn" onclick="hodSetBusy()">UPDATE BUSY TIME</button>
+    </div>
+
+    <div class="hod-section">
+        <label>Database Management:</label>
+        <button class="admin-btn hod-btn" onclick="registerUser()">REGISTER NEW FACE</button>
+        <button class="admin-btn hod-btn" style="border-color: #ff6600; color: #ff6600;" onclick="deleteUser()">DELETE USER</button>
+    </div>
+
+    <div id="current-hod-info" style="margin-top: auto; padding: 10px; border: 1px solid #444; background: #000; font-size: 0.85em;">
+        H O D Status: Available
+    </div>
 </div>
 
-<canvas id="photo-canvas" width="250" height="250"></canvas>
+<canvas id="photo-canvas" width="250" height="250" style="display:none;"></canvas>
 
 <script>
     const video = document.getElementById('webcam');
     const canvas = document.getElementById('photo-canvas');
     const statusBar = document.getElementById('status-bar');
-    const previewImg = document.getElementById('preview-img');
     const scanLine = document.getElementById('scan-line');
+    const capturedPhoto = document.getElementById('captured-photo');
+    const previewText = document.getElementById('preview-text');
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => { video.srcObject = stream; })
-        .catch(err => { statusBar.innerText = "STATUS: CAMERA ERROR"; });
+    navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
 
-    function captureSnapshot() {
-        const context = canvas.getContext('2d');
-        document.getElementById('camera-box').classList.add('flash');
-        setTimeout(() => document.getElementById('camera-box').classList.remove('flash'), 200);
-
-        // Center crop coordinates for 640x480 video
-        context.drawImage(video, 195, 115, 250, 250, 0, 0, 250, 250);
-        const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
-
-        previewImg.src = dataUrl;
-        previewImg.style.display = 'inline-block';
-        return dataUrl;
+    function speak(text) {
+        if (!text) return;
+        // Pronunciation fix: Force individual letters for H O D
+        let correctedText = text.replace(/HOD/g, "H O D");
+        const msg = new SpeechSynthesisUtterance(correctedText);
+        msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
     }
+
+    // Helper to capture image and show in the bottom preview
+    function captureFaceImage() {
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 195, 115, 250, 250, 0, 0, 250, 250);
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        // Show the photo in the preview element
+        capturedPhoto.src = imageData;
+        capturedPhoto.style.display = "inline-block";
+        previewText.style.display = "block";
+
+        return imageData;
+    }
+
+    // Polling logic
+    setInterval(() => {
+        fetch('/hod/check-status').then(r => r.json()).then(data => {
+            document.getElementById('current-hod-info').innerText = "H O D Status: " + data.hodStatus;
+            document.getElementById('pending-visitor').innerText = data.visitor ? data.visitor : "NONE";
+
+            if(data.granted && statusBar.innerText.includes("IDENTIFIED")) {
+                statusBar.innerText = "ACCESS GRANTED!";
+                speak("Permission granted. You may enter.");
+                setTimeout(() => { if(statusBar.innerText.includes("GRANTED")) statusBar.innerText = "STATUS: READY"; }, 5000);
+            }
+        });
+    }, 2000);
 
     function scanFace() {
         statusBar.innerText = "STATUS: SCANNING...";
-        scanLine.style.display = 'block'; // Start animation
-        const imageData = captureSnapshot();
+        scanLine.style.display = 'block';
+
+        const imageData = captureFaceImage();
 
         fetch('/verify', {
             method: 'POST',
@@ -113,58 +180,63 @@
         })
             .then(r => r.json())
             .then(data => {
-                scanLine.style.display = 'none'; // Stop animation
-                statusBar.innerText = "RESULT: " + data.message;
-                if(data.voiceMessage) {
-                    window.speechSynthesis.speak(new SpeechSynthesisUtterance(data.voiceMessage));
-                }
+                scanLine.style.display = 'none';
+                statusBar.innerText = data.message;
+                if(data.voiceMessage) speak(data.voiceMessage);
             });
+    }
+
+    function hodGrant() {
+        fetch('/hod/grant', { method: 'POST' }).then(r => r.json()).then(d => {
+            if(d.voiceMessage) speak(d.voiceMessage);
+            alert(d.message);
+        });
+    }
+
+    function clearSystem() {
+        fetch('/hod/clear-status', { method: 'POST' }).then(r => r.json()).then(d => {
+            speak(d.voiceMessage || "System reset. H O D is now available.");
+            statusBar.innerText = "STATUS: READY";
+            capturedPhoto.style.display = "none";
+            previewText.style.display = "none";
+            alert(d.message);
+        });
+    }
+
+    function hodSetBusy() {
+        const time = document.getElementById('busyTime').value;
+        if(!time) return;
+        fetch('/hod/set-busy?time=' + encodeURIComponent(time), { method: 'POST' })
+            .then(r => r.json()).then(d => {
+            if(d.voiceMessage) speak(d.voiceMessage);
+            alert(d.message);
+        });
     }
 
     async function registerUser() {
-        const imageData = captureSnapshot();
-
-        setTimeout(() => {
-            const name = prompt("Face captured! Enter Name for Registration:");
-            if (!name) {
-                statusBar.innerText = "STATUS: CANCELLED";
-                return;
-            }
-            statusBar.innerText = "STATUS: UPLOADING " + name.toUpperCase() + "...";
-
-            fetch('/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: imageData, name: name.trim() })
-            })
-                .then(r => r.json())
-                .then(data => {
-                    alert(data.message);
-                    statusBar.innerText = "STATUS: READY";
-                });
-        }, 200);
-    }
-
-    // UPDATED DELETE LOGIC
-    function deleteUser() {
-        const name = prompt("Enter the exact name of the user to delete:");
+        // Show capture immediately so HOD knows what they are registering
+        const imageData = captureFaceImage();
+        const name = prompt("Face captured! Enter Name for registration:");
         if (!name) return;
 
-        statusBar.innerText = "STATUS: DELETING " + name.toUpperCase() + "...";
+        fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageData, name: name.trim() })
+        }).then(r => r.json()).then(d => {
+            if(d.voiceMessage) speak(d.voiceMessage);
+            alert(d.message);
+        });
+    }
 
-        // This sends the name as a URL parameter to match @RequestParam in Java
-        fetch('/delete?name=' + encodeURIComponent(name.trim()), {
-            method: 'DELETE'
-        })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.message);
-                statusBar.innerText = "STATUS: " + data.message;
-            })
-            .catch(err => {
-                console.error(err);
-                statusBar.innerText = "STATUS: DELETE FAILED";
-            });
+    function deleteUser() {
+        const name = prompt("Enter user name to delete:");
+        if (!name) return;
+        fetch('/delete?name=' + encodeURIComponent(name.trim()), { method: 'DELETE' })
+            .then(r => r.json()).then(d => {
+            if(d.voiceMessage) speak(d.voiceMessage);
+            alert(d.message);
+        });
     }
 </script>
 </body>
